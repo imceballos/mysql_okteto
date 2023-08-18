@@ -1,0 +1,12 @@
+auth:
+  rootPassword: password
+  password: password
+
+primary:
+  persistence:
+    enabled: true
+  resources:
+    requests:
+      memory: 2Gi
+    limits:
+      memory: 2Gi
