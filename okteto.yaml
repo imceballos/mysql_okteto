@@ -1,0 +1,22 @@
+deploy:
+  - |
+    
+    IMAGE_TAG=${IMAGE_TAG:=5.7.38-debian-10-r10}
+    RELEASE_NAME="${RELEASE_NAME:=my-app-mysql}"
+    USE_SNAPSHOT="${USE_SNAPSHOT:=false}"
+    
+    export FROM_SNAPSHOT_NAME=${FROM_SNAPSHOT_NAME:=mysql}
+    export FROM_SNAPSHOT_NAMESPACE=${FROM_SNAPSHOT_NAMESPACE:=okteto}
+    export VOLUME_SIZE=${VOLUME_SIZE:=100Gi}
+
+    if [ ${USE_SNAPSHOT} == true ];
+    then 
+      yq -i '(.primary.persistence.storageClass="okteto-snapshot-sc") 
+      | (.primary.persistence.annotations."dev.okteto.com/from-snapshot-name"=env(FROM_SNAPSHOT_NAME)) 
+      | (.primary.persistence.annotations."dev.okteto.com/from-snapshot-namespace"=env(FROM_SNAPSHOT_NAMESPACE)) 
+      | (.primary.persistence.size=env(VOLUME_SIZE))' values.yaml
+    fi
+
+    helm repo add bitnami https://charts.bitnami.com/bitnami
+    helm upgrade --install "${RELEASE_NAME}" bitnami/mysql -f values.yaml --version=9.4.5 --set image.tag=${IMAGE_TAG}
+
